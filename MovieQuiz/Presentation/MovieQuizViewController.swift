@@ -129,6 +129,7 @@ final class MovieQuizViewController: UIViewController {
     }
     
     private func showQuestion(questionIndex: Int) {
+        guard 0 ..< questions.count ~= questionIndex else { return }
         let question = questions[questionIndex]
         let viewModel = convert(model: question)
         show(quiz: viewModel)
