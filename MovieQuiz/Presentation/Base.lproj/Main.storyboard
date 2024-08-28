@@ -60,7 +60,7 @@
                                     </imageView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Рейтинг этого фильма меньше, чем 5?" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QAv-kp-Fml" userLabel="Question Label">
                                         <rect key="frame" x="0.0" y="593.33333333333337" width="353" height="75.666666666666629"/>
-                                        <fontDescription key="fontDescription" name="YSDisplay-Bold" family="YS Display" pointSize="20"/>
+                                        <fontDescription key="fontDescription" name="YSDisplay-Bold" family="YS Display" pointSize="23"/>
                                         <color key="textColor" name="YP White"/>
                                         <nil key="highlightedColor"/>
                                     </label>
@@ -137,7 +137,9 @@
                     <connections>
                         <outlet property="counterLabel" destination="CJT-9O-kma" id="mFR-Uf-4r4"/>
                         <outlet property="imageView" destination="Y8M-Lr-dXg" id="5mO-b9-mXP"/>
+                        <outlet property="noButton" destination="01j-H1-vWT" id="jrY-x3-FH5"/>
                         <outlet property="textLabel" destination="QAv-kp-Fml" id="NSn-sJ-kr1"/>
+                        <outlet property="yesButton" destination="V1C-mZ-5dw" id="0eU-vA-JAO"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
