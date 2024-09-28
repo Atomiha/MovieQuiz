@@ -19,6 +19,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        textLabel.font = UIFont(name: "YS Display Bold", size: 23)
+        counterLabel.font = UIFont(name: "YS Display Medium", size: 20)
+        yesButton.titleLabel?.font =  UIFont(name: "YS Display Medium", size: 20)
+        noButton.titleLabel?.font =  UIFont(name: "YS Display Medium", size: 20)
         statisticService = StatisticService()
         let questionFactory = QuestionFactory()
         questionFactory.setup(delegate: self)
@@ -60,10 +64,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
         
         correctAnswers += isCorrect ? 1 : 0
-        
+        noButton.isEnabled = false
+        yesButton.isEnabled = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self else { return }
             self.showNextQuestionOrResults()
+            noButton.isEnabled = true
+            yesButton.isEnabled = true
         }
     }
     

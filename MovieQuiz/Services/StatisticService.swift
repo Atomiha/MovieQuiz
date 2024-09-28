@@ -34,7 +34,7 @@ extension StatisticService: StatisticServiceProtocol {
     var bestGame: GameResult {
         get {
             guard let data = storage.data(forKey: Keys.bestGame.rawValue),
-                  let game = try? JSONDecoder().decode(GameResult.self, from: data)  else {
+                  let game = try? decoder.decode(GameResult.self, from: data)  else {
                 return GameResult(correct: 0, total: 0, date: Date())
             }
             return game
