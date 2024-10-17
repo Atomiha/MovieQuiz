@@ -8,12 +8,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet weak var noButton: UIButton!
     @IBOutlet weak var yesButton: UIButton!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
-   // private var currentQuestionIndex = 0
+    // private var currentQuestionIndex = 0
     private var correctAnswers = 0
     
-   // private let questionsAmount: Int = 10
+    // private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
-    private var currentQuestion: QuizQuestion?
+    //private var currentQuestion: QuizQuestion?
     private var alertPresenter: AlertPresenter?
     private var statisticService: StatisticServiceProtocol?
     
@@ -36,36 +36,23 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         self.questionFactory = questionFactory
         showLoadingIndicator()
         questionFactory.loadData()
-        //showQuestion(questionIndex: currentQuestionIndex)
+        presenter.viewController = self
     }
     
     // MARK: - QuestionFactoryDelegate
     func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question = question else {return}
-        
-        currentQuestion = question
-        let viewModel = presenter.convert(model: question)
-        DispatchQueue.main.async { [weak self] in
-            self?.show(quiz: viewModel)
-        }
-        
+        presenter.didReceiveNextQuestion(question: question)
     }
     
     @IBAction func yesButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion = currentQuestion else {return}
-        let givenAnswer = true
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        presenter.yesButtonClicked()
     }
     
     @IBAction func noButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion = currentQuestion else {return}
-        let givenAnswer = false
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        presenter.noButtonClicked()
     }
     
-    // приватный метод, который меняет цвет рамки
-    private func showAnswerResult(isCorrect: Bool) {
-        // метод красит рамку
+    func showAnswerResult(isCorrect: Bool) {
         imageView.layer.masksToBounds = true // даём разрешение на рисование рамки
         imageView.layer.borderWidth = 8 // толщина рамки
         imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
@@ -76,36 +63,22 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         yesButton.isEnabled = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self else { return }
-            self.showNextQuestionOrResults()
+            self.presenter.correctAnswers = self.correctAnswers
+            self.presenter.questionFactory = self.questionFactory
+            imageView.layer.borderWidth = 0
+            self.presenter.showNextQuestionOrResults()
             noButton.isEnabled = true
             yesButton.isEnabled = true
         }
     }
     
-    // приватный метод, который содержит логику перехода в один из сценариев
-    private func showNextQuestionOrResults() {
-        imageView.layer.borderWidth = 0
-        if presenter.isLastQuestion() {
-            statisticService?.store(correct: correctAnswers, total: presenter.questionsAmount)
-            show(quiz: QuizResultsViewModel(title: "Этот раунд окончен!",
-                                            text: "Ваш результат: \(correctAnswers)/\(presenter.questionsAmount)\n\(getStatisticsText())",
-                                            buttonText: "Сыграть ещё раз"))
-        } else {
-            presenter.switchToNextQuestion()
-            questionFactory?.requestNextQuestion()
-        }
-    }
-    
-    // приватный метод вывода на экран вопроса, который принимает на вход вью модель вопроса и ничего не возвращает
-    private func show(quiz step: QuizStepViewModel) {
+    func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
     }
     
-    // приватный метод для показа результатов раунда квиза
-    private func show(quiz result: QuizResultsViewModel) {
-        
+    func show(quiz result: QuizResultsViewModel) {
         let model = AlertModel(title: result.title, message: result.text, buttonText: result.buttonText) { [weak self] in self?.restartQuiz()
         }
         alertPresenter = AlertPresenter(delegate: self)
@@ -117,18 +90,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         correctAnswers = 0
         questionFactory?.requestNextQuestion()
     }
-    private func getStatisticsText() -> String {
-        guard let statisticsService = statisticService else {
-            return "Статистика отсутствует"
-        }
-        
-        let gamesCount = statisticsService.gamesCount
-        let bestGame = "\(statisticsService.bestGame.correct)/\(statisticsService.bestGame.total)"
-        let bestGameDate = statisticsService.bestGame.date.dateTimeString
-        let overallAccuracy = String(format: "%.2f", statisticsService.totalAccuracy * 100)
-        
-        return "Количество сыгранных квизов: \(gamesCount)\nРекорд: \(bestGame) (\(bestGameDate))\nСредняя точность: \(overallAccuracy)%"
-    }
+    
     
     private func showLoadingIndicator() {
         activityIndicator.isHidden = false // говорим, что индикатор загрузки не скрыт
