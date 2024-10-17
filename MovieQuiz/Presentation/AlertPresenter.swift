@@ -26,7 +26,8 @@ class AlertPresenter {
         let action = UIAlertAction(title: model.buttonText, style: .default) { _ in
             model.completion()
         }
-        
+       
+        alert.view.accessibilityIdentifier = "Results"
         alert.addAction(action)
         delegate.present(alert, animated: true, completion: nil)
     }
