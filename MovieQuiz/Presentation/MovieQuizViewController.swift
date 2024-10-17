@@ -1,22 +1,14 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController {
+final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
     
     @IBOutlet private weak var imageView: UIImageView!
     @IBOutlet private weak var textLabel: UILabel!
     @IBOutlet private weak var counterLabel: UILabel!
-    @IBOutlet weak var noButton: UIButton!
-    @IBOutlet weak var yesButton: UIButton!
-    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
-    // private var currentQuestionIndex = 0
-    //private var correctAnswers = 0
-    
-    // private let questionsAmount: Int = 10
-    //private var questionFactory: QuestionFactoryProtocol?
-    //private var currentQuestion: QuizQuestion?
+    @IBOutlet private weak var noButton: UIButton!
+    @IBOutlet private weak var yesButton: UIButton!
+    @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     private var alertPresenter: AlertPresenter?
-    //private var statisticService: StatisticServiceProtocol?
-    
     private var presenter: MovieQuizPresenter!
     
     // MARK: - Lifecycle
@@ -30,47 +22,32 @@ final class MovieQuizViewController: UIViewController {
         imageView.layer.cornerRadius = 20
         noButton.layer.cornerRadius = 15
         yesButton.layer.cornerRadius = 15
-        //statisticService = StatisticService()
-        //let questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
-        //questionFactory.setup(delegate: self)
-        //self.questionFactory = questionFactory
         showLoadingIndicator()
-        //questionFactory.loadData()
         presenter = MovieQuizPresenter(viewController: self)
     }
     
     // MARK: - QuestionFactoryDelegate
-    func didReceiveNextQuestion(question: QuizQuestion?) {
-        presenter.didReceiveNextQuestion(question: question)
-    }
-    
-    @IBAction func yesButtonClicked(_ sender: UIButton) {
+    @IBAction private func yesButtonClicked(_ sender: UIButton) {
         presenter.yesButtonClicked()
     }
     
-    @IBAction func noButtonClicked(_ sender: UIButton) {
+    @IBAction private func noButtonClicked(_ sender: UIButton) {
         presenter.noButtonClicked()
     }
     
-    func showAnswerResult(isCorrect: Bool) {
-        imageView.layer.masksToBounds = true // даём разрешение на рисование рамки
-        imageView.layer.borderWidth = 8 // толщина рамки
-        imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
-        imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
-        
-        presenter.didAnswer(isCorrectAnswer: isCorrect)
-        //correctAnswers += isCorrect ? 1 : 0
+    func highlightImageBorder(isCorrectAnswer: Bool) {
+        imageView.layer.masksToBounds = true 
+        imageView.layer.borderWidth = 8
+        imageView.layer.cornerRadius = 20
+        imageView.layer.borderColor = isCorrectAnswer ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
         noButton.isEnabled = false
         yesButton.isEnabled = false
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            guard let self else { return }
-            //self.presenter.correctAnswers = self.correctAnswers
-            //self.presenter.questionFactory = self.questionFactory
-            imageView.layer.borderWidth = 0
-            self.presenter.showNextQuestionOrResults()
-            noButton.isEnabled = true
-            yesButton.isEnabled = true
-        }
+    }
+    
+    func hideImageBorder() {
+        imageView.layer.borderWidth = 0
+        noButton.isEnabled = true
+        yesButton.isEnabled = true
     }
     
     func show(quiz step: QuizStepViewModel) {
@@ -86,15 +63,9 @@ final class MovieQuizViewController: UIViewController {
         alertPresenter?.showAlert(model: model)
     }
     
-//    private func restartQuiz(){
-//        presenter.restartGame()
-//        questionFactory?.requestNextQuestion()
-//    }
-    
-    
     func showLoadingIndicator() {
-        activityIndicator.isHidden = false // говорим, что индикатор загрузки не скрыт
-        activityIndicator.startAnimating() // включаем анимацию
+        activityIndicator.isHidden = false 
+        activityIndicator.startAnimating()
     }
     
     func hideLoadingIndicator() {
@@ -102,26 +73,14 @@ final class MovieQuizViewController: UIViewController {
         activityIndicator.stopAnimating()
     }
     func showNetworkError(message: String) {
-        hideLoadingIndicator() // скрываем индикатор загрузки
-        
+        hideLoadingIndicator()
         let model = AlertModel(title: "Ошибка", message: message, buttonText: "Попробовать ещё раз") {[weak self] in
+            
             guard let self else {return}
             
             self.presenter.restartQuiz()
-            
-            self.presenter.questionFactory?.requestNextQuestion()
         }
-        
         alertPresenter?.showAlert(model: model)
     }
-    
-//    func didLoadDataFromServer() {
-//        activityIndicator.isHidden = true // скрываем индикатор загрузки
-//        questionFactory?.requestNextQuestion()
-//    }
-//    
-//    func didFailToLoadData(with error: Error) {
-//        showNetworkError(message: error.localizedDescription) // возьмём в качестве сообщения описание ошибки
-//    }
 }
 
